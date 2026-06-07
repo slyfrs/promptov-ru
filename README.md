@@ -43,11 +43,11 @@
 
 | Homepage | Prompt Page | Dashboard |
 |----------|-------------|-----------|
-| ![Homepage](/screenshots/screenshot_homepage.png) | ![Prompt](/screenshots/screenshot_prompt.png) | ![Dashboard](/screenshots/screenshot_dashboard.png) |
+| ![Homepage](/public/screenshots/screenshot_homepage.png) | ![Prompt](/public/screenshots/screenshot_prompt.png) | ![Dashboard](/public/screenshots/screenshot_dashboard.png) |
 
 | Admin Panel | Leaderboard | User Profile |
 |-------------|-------------|--------------|
-| ![Admin](/screenshots/screenshot_admin.png) | ![Leaderboard](/screenshots/screenshot_leaderboard.png) | ![Profile](/screenshots/screenshot_profile.png) |
+| ![Admin](/public/screenshots/screenshot_admin.png) | ![Leaderboard](/public/screenshots/screenshot_leaderboard.png) | ![Profile](/public/screenshots/screenshot_profile.png) |
 
 ---
 
