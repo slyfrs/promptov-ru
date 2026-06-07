@@ -1,0 +1,96 @@
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: promptov-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: promptov_prod
+      POSTGRES_USER: promptov_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - promptov-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U promptov_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: promptov-redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - promptov-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: promptov-backend
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://promptov_user:${DB_PASSWORD}@postgres:5432/promptov_prod
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      FRONTEND_URL: http://${DOMAIN}
+      MAIL_SERVER: ${MAIL_SERVER}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USE_SSL: ${MAIL_USE_SSL}
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      MAIL_DEFAULT_SENDER: ${MAIL_DEFAULT_SENDER}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - promptov-net
+    volumes:
+      - uploads_data:/app/uploads
+
+  frontend:
+    build: ./frontend
+    container_name: promptov-frontend
+    restart: always
+   # command: npx next start
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:5000
+      NEXT_PUBLIC_SITE_URL: http://${DOMAIN}
+    networks:
+      - promptov-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: promptov-nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - uploads_data:/var/www/uploads:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - promptov-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  uploads_data:
+
+networks:
+  promptov-net:
+    driver: bridge

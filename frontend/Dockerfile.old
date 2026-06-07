@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Копируем только нужное
+COPY .next ./.next
+COPY public ./public
+COPY node_modules ./node_modules
+COPY package.json ./
+COPY next.config.js ./
+COPY middleware.ts ./
+
+# Даём права на выполнение node_modules/.bin/
+RUN chmod +x node_modules/.bin/*
+# RUN npm install --omit=dev
+
+EXPOSE 3000
+
+CMD ["npm", "start"]

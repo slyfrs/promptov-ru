@@ -1,0 +1,150 @@
+<!-- frontend/tests/manual-testing.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Чек-лист тестирования форм</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 1200px; margin: 0 auto; padding: 20px; }
+        h1 { color: #333; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+        h2 { color: #555; margin-top: 25px; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+        th, td { border: 1px solid #ddd; padding: 8px 12px; text-align: left; }
+        th { background-color: #f0f0f0; }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; }
+        .status { text-align: center; }
+        button { background: #3b82f6; color: white; border: none; padding: 5px 10px; cursor: pointer; margin-right: 5px; }
+        button:hover { background: #2563eb; }
+        .summary { background: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <h1>📋 Чек-лист тестирования форм Promptov.ru</h1>
+    
+    <div class="summary">
+        <strong>Прогресс:</strong> <span id="passedCount">0</span>/<span id="totalCount">0</span> пройдено
+        <progress id="progressBar" value="0" max="0" style="width: 100%; height: 20px;"></progress>
+    </div>
+    
+    <div id="checklists"></div>
+    
+    <script>
+        const checklists = [
+            { name: "Регистрация", tests: [
+                "Пустая форма → ошибка",
+                "Неверный email → ошибка",
+                "Username из 2 символов → ошибка",
+                "Пароль из 5 символов → ошибка",
+                "Пароли не совпадают → ошибка",
+                "Существующий email → ошибка",
+                "Валидные данные → успех"
+            ]},
+            { name: "Комментарии", tests: [
+                "Пустой комментарий → ошибка",
+                "Комментарий из 1 символа → ошибка",
+                "Комментарий >2000 символов → ошибка",
+                "Неавторизованный → ссылка 'Войдите'",
+                "Валидный комментарий → отправлен на модерацию",
+                "Удаление своего комментария → подтверждение"
+            ]},
+            { name: "Настройки профиля", tests: [
+                "Bio >500 символов → ограничение",
+                "Telegram с пробелом → ошибка",
+                "Telegram <5 символов → ошибка",
+                "Website без http:// → ошибка",
+                "Дата рождения в будущем → ошибка",
+                "Валидные данные → успех"
+            ]},
+            { name: "Создание промпта", tests: [
+                "Пустое название → ошибка",
+                "Пустой текст → ошибка",
+                "Не выбрана категория → ошибка",
+                "Не выбрана нейросеть → ошибка",
+                "Картинка >2MB → ошибка",
+                "Валидные данные → успех"
+            ]}
+        ];
+        
+        let checks = [];
+        
+        function updateStats() {
+            const total = checks.length;
+            const passed = checks.filter(c => c.checked).length;
+            document.getElementById('passedCount').innerText = passed;
+            document.getElementById('totalCount').innerText = total;
+            const progress = document.getElementById('progressBar');
+            progress.max = total;
+            progress.value = passed;
+        }
+        
+        function render() {
+            const container = document.getElementById('checklists');
+            container.innerHTML = '';
+            checks = [];
+            
+            checklists.forEach(section => {
+                const sectionEl = document.createElement('div');
+                sectionEl.innerHTML = `<h2>📌 ${section.name}</h2><table id="table-${section.name}"><thead><tr><th>#</th><th>Тест</th><th class="status">✅ Пройден</th><th class="status">❌ Не пройден</th></tr></thead><tbody></tbody></table>`;
+                container.appendChild(sectionEl);
+                
+                const tbody = sectionEl.querySelector('tbody');
+                section.tests.forEach((test, idx) => {
+                    const checkId = `${section.name}-${idx}`;
+                    checks.push({ id: checkId, checked: false });
+                    const row = tbody.insertRow();
+                    row.insertCell(0).innerText = idx + 1;
+                    row.insertCell(1).innerText = test;
+                    const passCell = row.insertCell(2);
+                    const failCell = row.insertCell(3);
+                    passCell.className = 'status';
+                    failCell.className = 'status';
+                    passCell.innerHTML = `<input type="radio" name="${checkId}" value="pass" data-id="${checkId}">`;
+                    failCell.innerHTML = `<input type="radio" name="${checkId}" value="fail" data-id="${checkId}">`;
+                });
+            });
+            
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const id = e.target.dataset.id;
+                    const index = checks.findIndex(c => c.id === id);
+                    if (index !== -1) {
+                        checks[index].checked = e.target.value === 'pass';
+                        updateStats();
+                    }
+                });
+            });
+            
+            updateStats();
+        }
+        
+        function exportResults() {
+            const results = checks.map(c => ({ test: c.id, passed: c.checked }));
+            const json = JSON.stringify(results, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'test-results.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        function clearAll() {
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.checked = false;
+            });
+            checks.forEach(c => c.checked = false);
+            updateStats();
+        }
+        
+        render();
+        
+        const toolbar = document.createElement('div');
+        toolbar.style.margin = '20px 0';
+        toolbar.innerHTML = `<button onclick="exportResults()">📥 Экспорт результатов</button><button onclick="clearAll()">🗑️ Очистить всё</button>`;
+        document.body.insertBefore(toolbar, document.getElementById('checklists'));
+    </script>
+</body>
+</html>

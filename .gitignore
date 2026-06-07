@@ -1,0 +1,26 @@
+# Docker volumes
+uploads_data/
+postgres_data/
+redis_data/
+
+# Env files
+.env
+
+# SSL certificates
+ssl/
+
+# Backups
+backups/
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.pyc
+venv/
+*.pyc
+
+# Node
+node_modules/
+.next/
