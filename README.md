@@ -50,6 +50,26 @@
 | ![Admin](/public/screenshots/screenshot_admin.png) | ![Leaderboard](/public/screenshots/screenshot_leaderboard.png) | ![Profile](/public/screenshots/screenshot_profile.png) |
 
 ---
+## 👥 Demo Accounts
+
+You can test the platform with these demo credentials:
+
+| Role | Email | Password |
+|------|-------|----------|
+| 👤 **User** | `alex@example.com` | `test123` |
+| 👤 **User** | `marina@example.com` | `test123` |
+| 👑 **Moderator** | `ivan@example.com` | `test123` |
+
+> 💡 All demo passwords are `test123`. The Moderator account has access to the moderation panel at `/admin`.
+
+### Test Data
+The database includes:
+- 15+ test users
+- 100+ sample prompts across all categories
+- Various neural network tags (ChatGPT, DeepSeek, Midjourney, etc.)
+- Comments, likes, and favorites for realistic testing
+
+---
 
 ## 🛠️ Tech Stack
 
