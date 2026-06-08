@@ -38,7 +38,7 @@ def client():
     # Используем тестовую БД
     test_db_url = os.getenv(
         "TEST_DATABASE_URL",
-        "postgresql://postgres:postgres@localhost:test15347/promptov_test",
+        "postgresql://postgres:postgres@localhost:test123/promptov_test",
     )
 
     app.config["TESTING"] = True
